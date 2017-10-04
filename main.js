@@ -18,6 +18,10 @@ const SEARCH_ENDPOINT = 'https://www.googleapis.com/youtube/v3/search';
 const CHANNEL_ENDPOINT = 'https://www.googleapis.com/youtube/v3/channels';
 const YOUTUBE_URL = 'https://www.youtube.com/watch?v=';
 
+const STORE = {
+  pageToken: ''
+};
+
 $.getJSON(SEARCH_ENDPOINT, {
   part: 'snippet',
   key: AUTH_KEY,
@@ -31,13 +35,29 @@ function getVideoFromApi(searchVideo, callback) {
     part: 'snippet',
     key: AUTH_KEY,
     q: searchVideo,
-    maxResults: 25,
+    maxResults: 1,
   };
   $.getJSON(SEARCH_ENDPOINT, query, callback);
 }
 
+// function getNextPageToken(token) {
+//   const query = {
+//     part: 'snippet',
+//     key: AUTH_KEY,
+//     q: 'cats',
+//     nextPageToken: token
+//   };
+//   $.getJSON(SEARCH_ENDPOINT, query, token => {
+//     console.log('herehereherehere', token);
+//   });
+// }
+
+
 function renderResult(result) {
   console.log('render, ran');
+  STORE.pageToken = result.nextPageToken;
+  console.log(result.nextPageToken, result.kind);
+
   return (`
       <div>
         <a href="${YOUTUBE_URL + result.id.videoId}" target="_blank"><img src="${result.snippet.thumbnails.medium.url}" /></a>
@@ -48,10 +68,18 @@ function renderResult(result) {
     `);
 }
 
-function displayYouTubeVideo(videos) {
-  const results = videos.items.map((item) => renderResult(item));
+function displayYouTubeVideo(data) {
+  const results = data.items.map((item) => renderResult(item));
+  // const pagination = generatePagination(data);
   console.log('displayYouTubeVideo, ran');
   $('.js-search-results').html(results);
+  $('.js-search-pagination').html('<button type="button" class="next-page">NextPage</button>');
+}
+
+function handleNextPageClick() {
+  $('.js-search-pagination').on('click', '.next-page', event => {
+    console.log('next hit');
+  });
 }
 
 function watchSubmit() {
@@ -61,9 +89,11 @@ function watchSubmit() {
     const search = searchTarget.val();
     // clear out the input
     searchTarget.val('');
-    console.log('watchSubmit, ran');
+    //console.log('watchSubmit, ran');
     getVideoFromApi(search, displayYouTubeVideo);
   });
 }
   
 $(watchSubmit);
+handleNextPageClick();
+//
