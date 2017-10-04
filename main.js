@@ -14,16 +14,25 @@ Show buttons to get more results (using the previous and next page links from th
 */
 
 const AUTH_KEY = 'AIzaSyDY-WtPBlCHUihW4vJ7pms84oY-1mgwYJg';
-const ENDPOINT = 'https://www.googleapis.com/youtube/v3/search';
+const SEARCH_ENDPOINT = 'https://www.googleapis.com/youtube/v3/search';
+const CHANNEL_ENDPOINT = 'https://www.googleapis.com/youtube/v3/channels';
 const YOUTUBE_URL = 'https://www.youtube.com/watch?v=';
 
-$.getJSON(ENDPOINT, {
+$.getJSON(SEARCH_ENDPOINT, {
   part: 'snippet',
   key: AUTH_KEY,
   q: 'cats',
 }, response => {
   console.log(response);
 } );
+
+// $.getJSON(CHANNEL_ENDPOINT, {
+//   part: 'snippet',
+//   id: 'get a key variable',
+//   q: 'cats',
+// }, response => {
+//   console.log(response);
+// } );
 
 
 
@@ -33,7 +42,7 @@ function getVideoFromApi(searchVideo, callback) {
     key: AUTH_KEY,
     q: searchVideo,
   };
-  $.getJSON(ENDPOINT, query, callback);
+  $.getJSON(SEARCH_ENDPOINT, query, callback);
 }
 
 function renderResult(result) {
@@ -41,8 +50,9 @@ function renderResult(result) {
   return (`
       <div>
         <a href="${YOUTUBE_URL + result.id.videoId}" target="_blank"><img src="${result.snippet.thumbnails.medium.url}" /></a>
-        <h3>${result.snippet.channelTitle}</h3>
-        <p>${result.snippet.description}</p>
+        <h4>${result.snippet.title}</h4>
+        <a href="#">${result.snippet.channelTitle}</a>
+        <p>${result.snippet.publishedAt}</p>
       </div>
     `);
 }
