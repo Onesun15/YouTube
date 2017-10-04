@@ -1,12 +1,68 @@
 'use strict';
 /* global $ */
 
-const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3';
+/*
+App Requirements
+Accept a user search term
+Get JSON from the YouTube API based on the user search term
+Display the thumbnail image of the returned videos
+Optional Advanced functionality challenges
+Make the images clickable, leading the user to the YouTube video, on YouTube
+Make the images clickable, playing them in a lightbox
+Show a link for more from the channel that each video came from
+Show buttons to get more results (using the previous and next page links from the JSON)
+*/
 
-function getDataFromApi(searchTerm, callback) {
+const AUTH_KEY = 'AIzaSyDY-WtPBlCHUihW4vJ7pms84oY-1mgwYJg';
+const ENDPOINT = 'https://www.googleapis.com/youtube/v3/search';
+const YOUTUBE_URL = 'https://www.youtube.com/watch?v=';
+
+$.getJSON(ENDPOINT, {
+  part: 'snippet',
+  key: AUTH_KEY,
+  q: 'cats',
+}, response => {
+  console.log(response);
+} );
+
+
+
+function getVideoFromApi(searchVideo, callback) {
   const query = {
-    q: `${searchTerm} in:name`,
-    per_page: 5
+    part: 'snippet',
+    key: AUTH_KEY,
+    q: searchVideo,
   };
-  $.getJSON(YOUTUBE_SEARCH_URL, query, callback);
+  $.getJSON(ENDPOINT, query, callback);
 }
+
+function renderResult(result) {
+  console.log('render, ran');
+  return (`
+      <div>
+        <a href="${YOUTUBE_URL + result.id.videoId}" target="_blank"><img src="${result.snippet.thumbnails.medium.url}" /></a>
+        <h3>${result.snippet.channelTitle}</h3>
+        <p>${result.snippet.description}</p>
+      </div>
+    `);
+}
+
+function displayYouTubeVideo(videos) {
+  const results = videos.items.map((item) => renderResult(item));
+  console.log('displayYouTubeVideo, ran');
+  $('.js-search-results').html(results);
+}
+
+function watchSubmit() {
+  $('.js-search-form').submit(event => {
+    event.preventDefault();
+    const searchTarget = $(event.currentTarget).find('.js-query');
+    const search = searchTarget.val();
+    // clear out the input
+    searchTarget.val('');
+    console.log('watchSubmit, ran');
+    getVideoFromApi(search, displayYouTubeVideo);
+  });
+}
+  
+$(watchSubmit);
