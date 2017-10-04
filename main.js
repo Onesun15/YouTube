@@ -26,21 +26,12 @@ $.getJSON(SEARCH_ENDPOINT, {
   console.log(response);
 } );
 
-// $.getJSON(CHANNEL_ENDPOINT, {
-//   part: 'snippet',
-//   id: 'get a key variable',
-//   q: 'cats',
-// }, response => {
-//   console.log(response);
-// } );
-
-
-
 function getVideoFromApi(searchVideo, callback) {
   const query = {
     part: 'snippet',
     key: AUTH_KEY,
     q: searchVideo,
+    maxResults: 25,
   };
   $.getJSON(SEARCH_ENDPOINT, query, callback);
 }
