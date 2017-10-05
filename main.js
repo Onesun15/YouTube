@@ -1,18 +1,6 @@
 'use strict';
 /* global $ */
 
-/*
-App Requirements
-Accept a user search term
-Get JSON from the YouTube API based on the user search term
-Display the thumbnail image of the returned videos
-Optional Advanced functionality challenges
-Make the images clickable, leading the user to the YouTube video, on YouTube
-Make the images clickable, playing them in a lightbox
-Show a link for more from the channel that each video came from
-Show buttons to get more results (using the previous and next page links from the JSON)
-*/
-
 const AUTH_KEY = 'AIzaSyDY-WtPBlCHUihW4vJ7pms84oY-1mgwYJg';
 const SEARCH_ENDPOINT = 'https://www.googleapis.com/youtube/v3/search';
 const YOUTUBE_URL = 'https://www.youtube.com/watch?v=';
@@ -25,25 +13,13 @@ const STORE = {
   trackPageCount: 0
 };
 
-//  Test to see data object in console
-$.getJSON(SEARCH_ENDPOINT, {
-  part: 'snippet',
-  key: AUTH_KEY,
-  q: 'cats',
-}, response => {
-  console.log(response);
-} );
-
-
-/*********************   API Query   *********************/
-
+/*********************   API Queries   *********************/
 
 function getVideoFromApi(searchVideo, callback) {
   const query = {
     part: 'snippet',
     key: AUTH_KEY,
     q: searchVideo,
-    
   };
   $.getJSON(SEARCH_ENDPOINT, query, callback);
 }
@@ -105,9 +81,8 @@ function handlePreviousPageClick() {
 
 function handleNextPageClick() {
   $('.js-search-pagination').on('click', '.next-page', () => {
-    getNextPageToken();
     STORE.trackPageCount++;
-
+    getNextPageToken();
   });
 }
 
