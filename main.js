@@ -15,11 +15,11 @@ const STORE = {
 
 /*********************   API Queries   *********************/
 
-function getDataFromApi(searchVideo, callback) {
+function getDataFromApi(searchValue, callback) {
   const query = {
     part: 'snippet',
     key: AUTH_KEY,
-    q: searchVideo,
+    q: searchValue,
   };
   $.getJSON(SEARCH_ENDPOINT, query, callback);
 }
@@ -97,7 +97,6 @@ function handleSearchClick() {
 }
 
 $(() => {
-  handleSearchClick();
   handleSearchClick();
   handleNextPageClick();
   handlePreviousPageClick();
