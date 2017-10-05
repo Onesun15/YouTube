@@ -15,7 +15,7 @@ const STORE = {
 
 /*********************   API Queries   *********************/
 
-function getVideoFromApi(searchVideo, callback) {
+function getDataFromApi(searchVideo, callback) {
   const query = {
     part: 'snippet',
     key: AUTH_KEY,
@@ -31,7 +31,7 @@ function getNextPageToken() {
     q: STORE.searchTerm,
     pageToken: STORE.pageTokenNext
   };
-  $.getJSON(SEARCH_ENDPOINT, query, displayYouTubeVideo);
+  $.getJSON(SEARCH_ENDPOINT, query, generateYouTubeVideos);
 }
 
 function getPrevPageToken() {
@@ -41,7 +41,7 @@ function getPrevPageToken() {
     q: STORE.searchTerm,
     pageToken: STORE.pageTokenPrevious
   };
-  $.getJSON(SEARCH_ENDPOINT, query, displayYouTubeVideo);
+  $.getJSON(SEARCH_ENDPOINT, query, generateYouTubeVideos);
 }
 
 /*********************   HTML Generators   *********************/
@@ -57,7 +57,7 @@ function renderHTML(result) {
     `);
 }
 
-function displayYouTubeVideo(data) {
+function generateYouTubeVideos(data) {
   STORE.pageTokenNext = data.nextPageToken;
   STORE.pageTokenPrevious = data.prevPageToken;
   const results = data.items.map((item) => renderHTML(item));
@@ -85,17 +85,20 @@ function handleNextPageClick() {
   });
 }
 
-function watchSubmit() {
+function handleSearchClick() {
   $('.js-search-form').submit(event => {
     event.preventDefault();
     const searchTarget = $(event.currentTarget).find('.js-query');
     const search = searchTarget.val();
     STORE.searchTerm = search;
     searchTarget.val('');
-    getVideoFromApi(search, displayYouTubeVideo);
+    getDataFromApi(search, generateYouTubeVideos);
   });
 }
-  
-$(watchSubmit);
-handleNextPageClick();
-handlePreviousPageClick();
+
+$(() => {
+  handleSearchClick();
+  handleSearchClick();
+  handleNextPageClick();
+  handlePreviousPageClick();
+});
