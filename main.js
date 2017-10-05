@@ -24,24 +24,24 @@ function getDataFromApi(searchValue, callback) {
   $.getJSON(SEARCH_ENDPOINT, query, callback);
 }
 
-function getNextPageToken() {
+function getNextPageToken(callback) {
   const query = {
     part: 'snippet',
     key: AUTH_KEY,
     q: STORE.searchTerm,
     pageToken: STORE.pageTokenNext
   };
-  $.getJSON(SEARCH_ENDPOINT, query, generateYouTubeVideos);
+  $.getJSON(SEARCH_ENDPOINT, query, callback);
 }
 
-function getPrevPageToken() {
+function getPrevPageToken(callback) {
   const query = {
     part: 'snippet',
     key: AUTH_KEY,
     q: STORE.searchTerm,
     pageToken: STORE.pageTokenPrevious
   };
-  $.getJSON(SEARCH_ENDPOINT, query, generateYouTubeVideos);
+  $.getJSON(SEARCH_ENDPOINT, query, callback);
 }
 
 /*********************   HTML Generators   *********************/
@@ -74,14 +74,14 @@ function generateYouTubeVideos(data) {
 function handlePreviousPageClick() {
   $('.js-search-pagination').on('click', '.previous-page', () => {
     STORE.trackPageCount--;
-    getPrevPageToken();
+    getPrevPageToken(generateYouTubeVideos);
   });
 }
 
 function handleNextPageClick() {
   $('.js-search-pagination').on('click', '.next-page', () => {
     STORE.trackPageCount++;
-    getNextPageToken();
+    getNextPageToken(generateYouTubeVideos);
   });
 }
 
