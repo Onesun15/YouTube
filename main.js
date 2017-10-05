@@ -46,10 +46,7 @@ function getPrevPageToken() {
 
 /*********************   HTML Generators   *********************/
 
-function renderResult(result, data) {
-  STORE.pageTokenNext = data.nextPageToken;
-  STORE.pageTokenPrevious = data.prevPageToken;
-
+function renderHTML(result) { 
   return (`
       <div>
         <a href="${YOUTUBE_URL + result.id.videoId}" data-lightbox="${result.snippet.thumbnails.medium.url}" target="_blank"><img src="${result.snippet.thumbnails.medium.url}" /></a>
@@ -61,7 +58,9 @@ function renderResult(result, data) {
 }
 
 function displayYouTubeVideo(data) {
-  const results = data.items.map((item) => renderResult(item, data));
+  STORE.pageTokenNext = data.nextPageToken;
+  STORE.pageTokenPrevious = data.prevPageToken;
+  const results = data.items.map((item) => renderHTML(item));
   $('.js-search-results').html(results);
   if (STORE.trackPageCount === 0) {
     $('.js-search-pagination').html('<button type="button" class="next-page">NextPage</button>');
@@ -92,7 +91,6 @@ function watchSubmit() {
     const searchTarget = $(event.currentTarget).find('.js-query');
     const search = searchTarget.val();
     STORE.searchTerm = search;
-    // clear out the input
     searchTarget.val('');
     getVideoFromApi(search, displayYouTubeVideo);
   });
