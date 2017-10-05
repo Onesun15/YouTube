@@ -15,13 +15,14 @@ Show buttons to get more results (using the previous and next page links from th
 
 const AUTH_KEY = 'AIzaSyDY-WtPBlCHUihW4vJ7pms84oY-1mgwYJg';
 const SEARCH_ENDPOINT = 'https://www.googleapis.com/youtube/v3/search';
-const CHANNEL_ENDPOINT = 'https://www.googleapis.com/youtube/v3/channels';
 const YOUTUBE_URL = 'https://www.youtube.com/watch?v=';
+const CHANNEL_URL = 'https://www.youtube.com/channel/';
 
 const STORE = {
   pageTokenPrevious: null,
   pageTokenNext: null,
-  searchTerm: null
+  searchTerm: null,
+  trackPageCount: 0
 };
 
 //  Test to see data object in console
@@ -42,58 +43,71 @@ function getVideoFromApi(searchVideo, callback) {
     part: 'snippet',
     key: AUTH_KEY,
     q: searchVideo,
-    maxResults: 2,
+    
   };
   $.getJSON(SEARCH_ENDPOINT, query, callback);
 }
 
-// function getNextPageToken(token) {
-//   const query = {
-//     part: 'snippet',
-//     key: AUTH_KEY,
-//     q: STORE.searchTerm,
-//     nextPageToken: token
-//   };
-//   $.getJSON(SEARCH_ENDPOINT, query, token => {
-//     console.log('herehereherehere', token);
-//   });
-// }
+function getNextPageToken() {
+  const query = {
+    part: 'snippet',
+    key: AUTH_KEY,
+    q: STORE.searchTerm,
+    pageToken: STORE.pageTokenNext
+  };
+  $.getJSON(SEARCH_ENDPOINT, query, displayYouTubeVideo);
+}
 
+function getPrevPageToken() {
+  const query = {
+    part: 'snippet',
+    key: AUTH_KEY,
+    q: STORE.searchTerm,
+    pageToken: STORE.pageTokenPrevious
+  };
+  $.getJSON(SEARCH_ENDPOINT, query, displayYouTubeVideo);
+}
 
-function renderResult(result) {
-  console.log('render, ran');
-  STORE.pageToken = result.nextPageToken;
-  console.log(result.nextPageToken, result.kind);
+/*********************   HTML Generators   *********************/
+
+function renderResult(result, data) {
+  STORE.pageTokenNext = data.nextPageToken;
+  STORE.pageTokenPrevious = data.prevPageToken;
 
   return (`
       <div>
-        <a href="${YOUTUBE_URL + result.id.videoId}" target="_blank"><img src="${result.snippet.thumbnails.medium.url}" /></a>
+        <a href="${YOUTUBE_URL + result.id.videoId}" data-lightbox="${result.snippet.thumbnails.medium.url}" target="_blank"><img src="${result.snippet.thumbnails.medium.url}" /></a>
         <h4>${result.snippet.title}</h4>
-        <a href="#">${result.snippet.channelTitle}</a>
+        <a href="${CHANNEL_URL + result.snippet.channelId}" target="_blank">Channel: ${result.snippet.channelTitle}</a>
         <p>${result.snippet.publishedAt}</p>
       </div>
     `);
 }
 
 function displayYouTubeVideo(data) {
-  const results = data.items.map((item) => renderResult(item));
-  // const pagination = generatePagination(data);
-  console.log('displayYouTubeVideo, ran');
+  const results = data.items.map((item) => renderResult(item, data));
   $('.js-search-results').html(results);
-  $('.js-search-pagination').html('<button type="button" class="previous-page">PreviousPage</button><button type="button" class="next-page">NextPage</button>');
+  if (STORE.trackPageCount === 0) {
+    $('.js-search-pagination').html('<button type="button" class="next-page">NextPage</button>');
+  } else {
+    $('.js-search-pagination').html('<button type="button" class="previous-page">PreviousPage</button><button type="button" class="next-page">NextPage</button>');
+  }
 }
 
 /*********************   Event Handlers   *********************/
 
 function handlePreviousPageClick() {
-  $('.js-search-pagination').on('click', '.previous-page', event => {
-    console.log('previous hit');
+  $('.js-search-pagination').on('click', '.previous-page', () => {
+    STORE.trackPageCount--;
+    getPrevPageToken();
   });
 }
 
 function handleNextPageClick() {
-  $('.js-search-pagination').on('click', '.next-page', event => {
-    console.log('next hit');
+  $('.js-search-pagination').on('click', '.next-page', () => {
+    getNextPageToken();
+    STORE.trackPageCount++;
+
   });
 }
 
@@ -105,7 +119,6 @@ function watchSubmit() {
     STORE.searchTerm = search;
     // clear out the input
     searchTarget.val('');
-    console.log('watchSubmit, ran');
     getVideoFromApi(search, displayYouTubeVideo);
   });
 }
@@ -113,4 +126,3 @@ function watchSubmit() {
 $(watchSubmit);
 handleNextPageClick();
 handlePreviousPageClick();
-//
